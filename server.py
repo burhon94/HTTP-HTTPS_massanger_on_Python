@@ -1,4 +1,5 @@
-from pprint import pprint
+from flask import Flask
+app = Flask(__name__)
 
 massages = [
     {
@@ -18,4 +19,10 @@ massages = [
     }
 ]
 
-pprint(massages)
+
+@app.route("/")
+def main_Page():
+    return "Hello World! from Flask by python"
+
+
+app.run()
