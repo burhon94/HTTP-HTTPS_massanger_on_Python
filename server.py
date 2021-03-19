@@ -1,6 +1,7 @@
 import time
 
 from flask import Flask
+
 app = Flask(__name__)
 
 messages = [
@@ -32,14 +33,24 @@ def status():
     return {
         'status': True,
         'app': "Messenger",
-        'server_time': time.time() #unix_time_stamp
+        'server_time': time.time()  # unix_time_stamp
     }
 
 
 @app.route("/get/msgs")
 def get_msgs():
+    msgs = []
+
+    for message in messages:
+        msg = {
+            'msg_info': message['name'] + ' ' + message['time'],
+            'msg_text': message['text'],
+        }
+        msgs.append(msg)
+
     return {
         'msgs': messages
     }
+
 
 app.run()
