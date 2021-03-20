@@ -70,9 +70,7 @@ def get_msgs():
         }
 
     try:
-        # execute the INSERT statement
         cursor.execute(sqlSelect, (after,))
-        # commit the changes to the database
         conn.commit()
 
         for msg in cursor:
@@ -80,6 +78,11 @@ def get_msgs():
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        return {
+            'code': 500,
+            'payload': '',
+            'error': str(error)
+        }
 
     cursor.close()
     conn.close()
@@ -104,6 +107,11 @@ def send_msg():
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        return {
+            'code': 500,
+            'payload': '',
+            'error': str(error)
+        }
 
     cursor.close()
     conn.close()
