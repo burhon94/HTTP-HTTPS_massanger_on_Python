@@ -1,26 +1,43 @@
 import time
+import psycopg2 as psycopg2
 
 from flask import Flask, request
 
 app = Flask(__name__)
 
-messages = [
-    {
-        'name': "Nick",
-        'text': "Hello, world",
-        'time': 1616140575.879213
-    },
-    {
-        'name': "Marry",
-        'text': "Hello Nick!, How are you?",
-        'time': 1616140578.379213
-    },
-    {
-        'name': "Nick",
-        'text': "Hi Marry, I'm fine, what about you?",
-        'time': 1616140581.279213
-    }
-]
+
+sqlTable = """CREATE TABLE IF NOT EXISTS messages
+(
+    id   bigserial unique primary key,
+    name text not null,
+    text text not null,
+    time float
+);"""
+
+sqlSelect = """SELECT(name, text, time) from messages where time > %s;"""
+
+sqlInsert = """INSERT INTO messages(name, text, time) VALUES
+(%s, %s, %s);"""
+
+
+def get_conn():
+    conn = psycopg2.connect(dbname='messenger', user='user',
+                        password='pass', host='localhost', port=5432)
+    return conn
+
+
+connInit = get_conn()
+cursorInit = connInit.cursor()
+try:
+    # execute the INSERT statement
+    cursorInit.execute(sqlTable)
+    # commit the changes to the database
+    connInit.commit()
+except (Exception, psycopg2.DatabaseError) as error:
+    print(error)
+
+cursorInit.close()
+connInit.close()
 
 
 @app.route("/")
@@ -39,6 +56,10 @@ def status():
 
 @app.route("/get/msgs", methods=["GET"])
 def get_msgs():
+    msg_filtered = []
+    conn = get_conn()
+    cursor = conn.cursor()
+
     try:
         after = float(request.args['after'])
     except:
@@ -48,10 +69,20 @@ def get_msgs():
             'error': 'after not undefined'
         }
 
-    msg_filtered = []
-    for msg in messages:
-        if msg['time'] > after:
+    try:
+        # execute the INSERT statement
+        cursor.execute(sqlSelect, (after,))
+        # commit the changes to the database
+        conn.commit()
+
+        for msg in cursor:
             msg_filtered.append(msg)
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    cursor.close()
+    conn.close()
     return {
         'msgs': msg_filtered
     }
@@ -59,20 +90,26 @@ def get_msgs():
 
 @app.route("/send/msg", methods=['POST'])
 def send_msg():
+    conn = get_conn()
+    cursor = conn.cursor()
+
     data = request.json
     name = data.get('name')
     text = data.get('text')
+    tm = time.time()
 
-    msg = {
-        'name': name,
-        'text': text,
-        'time': time.time()
-    }
-    messages.append(msg)
+    try:
+        cursor.execute(sqlInsert, (name, text, tm,))
+        conn.commit()
 
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    cursor.close()
+    conn.close()
     return {
         'code': 200,
-        'payload': msg['time'],
+        'payload': tm,
         'error': ''
     }
 
