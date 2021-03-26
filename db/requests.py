@@ -57,17 +57,25 @@ def get_msgs(after):
     msg_filtered = []
 
     try:
-        cursor.execute("""SELECT(name, text, time) from messages where time > %s;""", (after,))
-        conn.commit()
+        cursor.execute("""SELECT name, text, time from messages where time > %s;""", (after,))
 
-        for msg in cursor:
-            msg_filtered.append(msg)
+        for row in cursor:
+            tmp = {}
+            msg_sender = str(row[0])
+            msg_text = str(row[1])
+            msg_time = float(row[2])
+
+            tmp["name"] = msg_sender
+            tmp["text"] = msg_text
+            tmp["time"] = msg_time
+            msg_filtered.append(tmp)
+        Close(conn, cursor)
 
         resp = {
-            'msgs': msg_filtered
+            'code': 200,
+            'payload': msg_filtered,
+            'error': ''
         }
-
-        Close(conn, cursor)
         return resp
 
     except (Exception, psycopg2.DatabaseError) as error:
