@@ -1,10 +1,14 @@
 import psycopg2 as psycopg2
+import os
 
 from db.db import Get
 from db.db import Close
 
 
 def initDB():
+    dbURL = os.environ.get('DATABASE_URL')
+    print(dbURL)
+
     conn = Get()
     cursor = conn.cursor()
     try:
