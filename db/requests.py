@@ -6,9 +6,6 @@ from db.db import Close
 
 
 def initDB():
-    dbURL = os.environ.get('DATABASE_URL')
-    print(dbURL)
-
     conn = Get()
     cursor = conn.cursor()
     try:
