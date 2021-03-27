@@ -9,7 +9,7 @@ requests.initDB()
 
 @app.route("/")
 def main_Page():
-    return "Hello World! from Flask by python"
+    return "<h1>Hello World! from Python by Heroku</h1>"
 
 
 @app.route("/status")
@@ -47,4 +47,4 @@ def send_msg():
     return resp
 
 
-app.run()
+app.run(threaded=True, port=5000)
