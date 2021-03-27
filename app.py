@@ -1,3 +1,4 @@
+import os
 import time
 from db import requests
 
@@ -5,6 +6,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 requests.initDB()
+port = os.environ.get('PORT')
 
 
 @app.route("/")
@@ -47,4 +49,4 @@ def send_msg():
     return resp
 
 
-app.run()
+app.run('0.0.0.0', port)
